@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+chromadb
+sentence-transformers
+langchain-text-splitters
+fastapi_mcp
+python-multipart
+pypdf
+langchain
+langchain-community
+pytest
+httpx
+pytest-asyncio
+unstructured[md]
+sentencepiece
+fpdf2

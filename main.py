@@ -18,6 +18,8 @@ mcp = FastApiMCP(
     name="RAG Service MCP",
     description="MCP interface for RAG document ingestion and retrieval",
     auth_config=None,
+    describe_all_responses=True,
+    describe_full_response_schema=True,
 )
 mcp.mount()
 

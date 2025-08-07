@@ -1,27 +1,13 @@
-# main.py
-from fastapi import FastAPI, File, UploadFile, HTTPException, Depends
+from fastapi import APIRouter, File, UploadFile, HTTPException
 from pydantic import BaseModel
-from fastapi_mcp import FastApiMCP
-from fastapi.security import HTTPBearer
-from rag_service import RAGService
-import uvicorn
+# No longer need Depends or HTTPBearer here
+from ..rag_service import RAGService
 
-app = FastAPI(title="RAG MCP Service")
+router = APIRouter()
 
 rag = RAGService()
 
-# セキュリティトークン認証（簡易例）
-auth_scheme = HTTPBearer()
-
-mcp = FastApiMCP(
-    app,
-    name="RAG Service MCP",
-    description="MCP interface for RAG document ingestion and retrieval",
-    auth_config=None,
-    describe_all_responses=True,
-    describe_full_response_schema=True,
-)
-mcp.mount()
+# The auth_scheme is removed.
 
 class QueryResultItem(BaseModel):
     text: str
@@ -32,7 +18,7 @@ class QueryResponse(BaseModel):
     query: str
     results: list[QueryResultItem]
 
-@app.post(
+@router.post(
     "/ingest/",
     operation_id="ingest_document",
     summary="インジェスト文書",
@@ -41,14 +27,13 @@ class QueryResponse(BaseModel):
 async def ingest_document(
     file: UploadFile = File(...),
     collection_name: str = "documents",
-    token=Depends(auth_scheme),
+    # The token dependency is removed from the signature
 ):
     content = await file.read()
-    # The RAGService now handles bytes and different file types
     rag.add_document(content, filename=file.filename, collection_name=collection_name)
     return {"message": f"'{file.filename}' を登録しました。"}
 
-@app.get(
+@router.get(
     "/query/",
     operation_id="query_rag",
     summary="RAG クエリ",
@@ -61,12 +46,9 @@ async def query_endpoint(query: str, collection_name: str = "documents"):
     result = rag.query_rag(query_text=query, n_results=3, collection_name=collection_name)
     return result
 
-@app.get("/healthcheck", summary="Health Check")
+@router.get("/healthcheck", summary="Health Check")
 async def healthcheck():
     """
     Returns a 200 OK status if the server is running.
     """
     return {"status": "ok"}
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)

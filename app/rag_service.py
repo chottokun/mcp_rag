@@ -128,18 +128,19 @@ class RAGService:
             metadata={"hnsw:space": "cosine"}  # Use cosine distance
         )
         prefq = f"検索クエリ: {query_text}"
-        emb = self.model.encode([prefq]).tolist() # Pylanceエラー修正
+        emb = self.model.encode([prefq]).tolist()
         res = collection.query(
-            query_embeddings=[emb], n_results=n_results, include=["documents", "metadatas", "distances"]
+            query_embeddings=emb,
+            n_results=n_results,
+            include=["documents", "metadatas", "distances"]
         )
 
-        if not res or not res.get("documents") or not res["documents"]:
+        if not res or not res.get("documents") or not res["documents"][0]:
             return {"query": query_text, "results": []}
 
-        # Pylanceエラー修正: res["documents"]などがリストのリストで返されるため、でアクセス
-        docs = [d.replace("検索文書: ", "") for d in res["documents"]]
-        metas = res["metadatas"]
-        distances = res["distances"]
+        docs = [d.replace("検索文書: ", "") for d in res["documents"][0]]
+        metas = res["metadatas"][0]
+        distances = res["distances"][0]
 
         # Filter results based on a distance threshold.
         DISTANCE_THRESHOLD = 0.2

@@ -1,7 +1,7 @@
 import pytest
 import os
 import shutil
-from rag_service import RAGService
+from app.rag_service import RAGService
 
 from fpdf import FPDF
 

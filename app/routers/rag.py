@@ -52,3 +52,24 @@ async def healthcheck():
     Returns a 200 OK status if the server is running.
     """
     return {"status": "ok"}
+
+class DeleteRequest(BaseModel):
+    filename: str
+    collection_name: str = "documents"
+
+@router.post(
+    "/delete_document/",
+    operation_id="delete_document",
+    summary="ドキュメントを削除",
+    description="ファイル名を指定して、埋め込み済みのドキュメントを削除します。"
+)
+async def delete_document_endpoint(request: DeleteRequest):
+    """
+    Deletes a document from the specified collection based on the filename.
+    """
+    try:
+        rag.delete_document(filename=request.filename, collection_name=request.collection_name)
+        return {"message": f"'{request.filename}' was successfully deleted from collection '{request.collection_name}'."}
+    except Exception as e:
+        # A more specific exception might be better, but for now, this is a safeguard.
+        raise HTTPException(status_code=500, detail=f"An error occurred while deleting the document: {e}")

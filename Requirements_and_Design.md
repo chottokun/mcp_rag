@@ -74,10 +74,15 @@ graph TD
 
   * 「検索クエリ: 」プレフィックス付きクエリで埋め込み生成 → `collection.query()` で類似検索 → プレフィックス除去後にチャンク再構成し返却。
 
+* `delete_document(filename, collection_name)`:
+
+  * `collection.delete(where={"source": filename})` を利用し、指定されたファイル名に紐づく全てのチャンクを削除。
+
 #### FastAPI ルート
 
 * `/ingest/` POST：`operation_id="ingest_document"`, アップロード処理と `add_document` 呼び出し。
 * `/query/` GET：`operation_id="query_rag"`, クエリパラメータ受け取り → `query_rag` 呼び出し → JSON 出力。
+* `/delete_document/` POST: `operation_id="delete_document"`, `filename` と `collection_name` を受け取り → `delete_document` を呼び出し → 削除結果を返す。
 * 事前定義した `operation_id` により、MCP ツール名が直感的でエージェントの利用性が向上 ([Toolify][7])。
 
 ### 2.3 拡張設計
@@ -266,6 +271,13 @@ python main.py
    MCP エンドポイント: `http://127.0.0.1:8000/mcp`
 
 4. Postman や curl で `/ingest/` にテキストファイル投稿、その後 `/query/?query=～` によって類似文書取得が可能。
+
+5. `curl` で `/delete_document/` にファイル名を指定してドキュメントを削除する例:
+```bash
+curl -X POST http://127.0.0.1:8000/delete_document/ \
+-H "Content-Type: application/json" \
+-d '{"filename": "your_file_to_delete.txt", "collection_name": "documents"}'
+```
 
 ---
 

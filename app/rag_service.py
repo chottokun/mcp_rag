@@ -151,3 +151,18 @@ class RAGService:
                 results.append({"text": doc, "metadata": meta, "distance": dist})
 
         return {"query": query_text, "results": results}
+
+    def delete_document(self, filename: str, collection_name: str = "documents"):
+        """
+        指定されたファイル名に基づいて、ChromaDB からドキュメントを削除します。
+
+        Args:
+            filename (str): 削除するドキュメントのファイル名。
+            collection_name (str, optional): ドキュメントが格納されている
+                                             コレクションの名前。
+                                             デフォルトは "documents"。
+        """
+        collection = self.client.get_or_create_collection(name=collection_name)
+
+        # The 'where' filter targets documents whose metadata contains the specified source filename.
+        collection.delete(where={"source": filename})

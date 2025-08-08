@@ -96,3 +96,17 @@
     ```bash
     curl -X GET http://127.0.0.1:8000/rag/healthcheck
     ```
+
+### 4. ドキュメントの削除
+
+- **URL**: `/rag/delete_document/`
+- **メソッド**: `POST`
+- **説明**: 指定されたコレクションからファイル名に基づいてドキュメントを削除します。
+- **ボディ**: `application/json` 形式で、`filename` と `collection_name` を含めます。
+- **`curl` での例**:
+    ```bash
+    curl -X POST "http://127.0.0.1:8000/rag/delete_document/" \
+         -H "Authorization: Bearer your-secret-api-key" \
+         -H "Content-Type: application/json" \
+         -d '{"filename": "document_to_delete.txt", "collection_name": "my_collection"}'
+    ```

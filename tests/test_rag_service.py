@@ -75,6 +75,44 @@ def test_add_and_query_multiple_collections(rag_service: RAGService):
     cross_query_results = rag_service.query_rag("contract law", collection_name="tech_docs")
     assert len(cross_query_results["results"]) == 0
 
+
+def test_delete_document(rag_service: RAGService):
+    """
+    Tests the ability to delete a document from a collection.
+    """
+    collection_name = "deletion_test"
+    doc_content = "This is a document to be deleted.".encode('utf-8')
+    doc_filename = "to_be_deleted.txt"
+
+    # Add a document and verify it's there
+    rag_service.add_document(doc_content, doc_filename, collection_name=collection_name)
+    results_before_delete = rag_service.query_rag("document to be deleted", collection_name=collection_name)
+    assert len(results_before_delete["results"]) > 0
+    assert results_before_delete["results"][0]["metadata"]["source"] == doc_filename
+
+    # Delete the document
+    rag_service.delete_document(filename=doc_filename, collection_name=collection_name)
+
+    # Verify the document is gone
+    results_after_delete = rag_service.query_rag("document to be deleted", collection_name=collection_name)
+    assert len(results_after_delete["results"]) == 0
+
+
+def test_delete_non_existent_document(rag_service: RAGService):
+    """
+    Tests that attempting to delete a non-existent document does not raise an error.
+    """
+    collection_name = "deletion_test_non_existent"
+    # Ensure the collection is clean for this test
+    # Note: The fixture already provides a clean DB, but this makes the test's intent clearer.
+
+    # Attempt to delete a document that was never added
+    try:
+        rag_service.delete_document(filename="non_existent.txt", collection_name=collection_name)
+    except Exception as e:
+        pytest.fail(f"Deleting a non-existent document raised an exception: {e}")
+
+
 def test_add_markdown_file(rag_service: RAGService):
     """
     Tests adding a markdown file to the RAG service.
